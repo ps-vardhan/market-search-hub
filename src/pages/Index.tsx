@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ const popularSearches = [
 const Index = () => {
   const [loaded, setLoaded] = useState(false);
   const [query, setQuery] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLoaded(true);
@@ -24,11 +26,12 @@ const Index = () => {
   // Handler for clicking a popular search suggestion
   const handlePopularClick = (search: string) => {
     setQuery(search);
-    // Optionally, trigger a search here or focus the SearchBar
-    // For now, simply set search term in state (and could wire into SearchBar if needed)
-    // In a future update, could expose setQuery to SearchBar via props, but out of scope now
-    // So just console log for demo
     console.log('Popular search selected:', search);
+  };
+
+  // New handler for direct navigation to results page with default query
+  const goToResultsDirectly = () => {
+    navigate('/results?query=top');
   };
 
   return (
@@ -50,9 +53,7 @@ const Index = () => {
               <stop offset="100%" stopColor="#9b87f5" />
             </linearGradient>
           </defs>
-          {/* Layer 1: Gradient background */}
           <rect width="100%" height="100%" fill="url(#bgGradient)" opacity="0.85" />
-          {/* Layer 2: Moving curves (animate via CSS keyframes) */}
           <path
             className="animate-market-float-1"
             d="M0,350 Q400,220 800,350 T1600,350"
@@ -79,7 +80,6 @@ const Index = () => {
           />
         </svg>
       </div>
-      {/* Animations for SVG */}
       <style>{`
         @keyframes market-float-1 {
           0% { transform: translateY(0px); }
@@ -116,11 +116,9 @@ const Index = () => {
             <p className="text-lg md:text-xl text-white/80 text-center mb-8 max-w-2xl mx-auto">
               Enter a product to instantly see its latest performance & insights.
             </p>
-            {/* Search Bar (centered) */}
             <div className="w-full max-w-2xl mx-auto relative">
               <SearchBar />
             </div>
-            {/* Popular Searches */}
             <div
               className={`mt-8 flex flex-col items-center transition-all duration-700 delay-400 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
             >
@@ -138,10 +136,12 @@ const Index = () => {
                 ))}
               </div>
             </div>
-            {/* Start Analyzing CTA Button */}
-            <div className="mt-16 flex justify-center">
+            <div className="mt-16 flex justify-center gap-4">
               <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white shadow-lg text-lg px-10 py-6 rounded-full animate-fade-in">
                 Start Analyzing
+              </Button>
+              <Button size="lg" variant="secondary" className="text-white shadow-lg text-lg px-10 py-6 rounded-full animate-fade-in" onClick={goToResultsDirectly}>
+                Go To Results (No Input)
               </Button>
             </div>
           </div>
