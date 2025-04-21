@@ -248,9 +248,12 @@ export default function Results() {
                 ))}
               </Pie>
               <Tooltip
-                formatter={(_value: any, name: any, props: any) =>
-                  [`${pieChartData[props.dataIndex].display}`, name]
-                }
+                formatter={(_value: any, name: any, props: any) => {
+                  if (props && typeof props.dataIndex === 'number' && pieChartData[props.dataIndex]) {
+                    return [`${pieChartData[props.dataIndex].display}`, name];
+                  }
+                  return [`${_value}`, name];
+                }}
                 contentStyle={{ backgroundColor: "#fff", color: "#151515" }}
               />
               <Legend
