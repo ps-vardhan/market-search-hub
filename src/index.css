@@ -99,3 +99,42 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes floatPath {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float-1 {
+  animation: floatPath 8s ease-in-out infinite;
+}
+
+.animate-float-2 {
+  animation: floatPath 12s ease-in-out infinite 1s;
+}
+
+.animate-float-3 {
+  animation: floatPath 10s ease-in-out infinite 2s;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
