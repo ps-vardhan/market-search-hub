@@ -2,20 +2,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChartLine } from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from "recharts";
-import { ChartContainer } from "@/components/ui/chart";
+import LineChartSection from "@/components/results/LineChartSection";
+import RecommendationsSection from "@/components/results/RecommendationsSection";
+import PieChartSection from "@/components/results/PieChartSection";
 
 const lineChartData = [
   { month: "OCT", year: "2019", value: 40 },
@@ -130,142 +119,9 @@ export default function Results() {
             <span className="text-orange-400 ml-2">{query}</span>
           </h2>
         </div>
-        <section className="mb-12">
-          <div className="rounded-xl bg-white/90 shadow-lg backdrop-blur-sm px-8 py-6">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-2">
-              <span className="text-lg md:text-xl font-semibold text-gray-800 block mb-1 md:mb-0">
-                Produce sales
-              </span>
-              <span className="text-xs uppercase tracking-widest text-gray-500 font-medium block">
-                In Thousands (USD)
-              </span>
-            </div>
-            <div className="w-full h-60">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={lineChartData} margin={{ top: 20, right: 25, left: 0, bottom: 5 }}>
-                  <CartesianGrid stroke="#DEE2E6" opacity={0.7} vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    axisLine={{ stroke: "#9ca3af" }}
-                    tickLine={false}
-                    tick={{ fill: "#444", fontSize: 13, fontWeight: 500 }}
-                    interval={0}
-                    padding={{ left: 10, right: 10 }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#222", fontSize: 12, fontWeight: 500 }}
-                    domain={[0, 90]}
-                    ticks={[0,10,20,30,40,50,60,70,80,90]}
-                  />
-                  <Tooltip
-                    formatter={(value: any) => [`${value}K`, "Sales"]}
-                    cursor={{ stroke: "#222", strokeWidth: 1, opacity: 0.2 }}
-                    contentStyle={{ backgroundColor: "#fff" }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#151515"
-                    strokeWidth={4}
-                    dot={{
-                      r: 6,
-                      fill: "#fff",
-                      stroke: "#151515",
-                      strokeWidth: 3
-                    }}
-                    activeDot={{
-                      r: 9,
-                      fill: "#151515",
-                      stroke: "#151515",
-                      strokeWidth: 3
-                    }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="text-gray-400 text-xs text-left pl-2 mt-3">OCT 2019 - JUN 2020</div>
-          </div>
-        </section>
-        <section className="mb-12">
-          <div className="w-full flex flex-col md:flex-row gap-6">
-            {recommendations.map((rec, idx) => (
-              <div
-                key={rec.title}
-                className={`${rec.bg} flex-1 rounded-xl flex flex-col items-center justify-center py-7 px-2 text-center shadow-md`}
-                style={{
-                  minWidth: 0,
-                  minHeight: 120,
-                }}
-              >
-                <span
-                  className={`block font-bold ${
-                    idx === 0
-                      ? "text-3xl"
-                      : idx === 1
-                      ? "text-3xl"
-                      : "text-2xl"
-                  } ${rec.className}`}
-                >
-                  {rec.title}
-                </span>
-                <span
-                  className={`block mt-3 ${
-                    idx === 2 ? "text-gray-300" : "text-gray-200"
-                  } font-normal text-base`}
-                >
-                  {rec.subtitle}
-                </span>
-                {rec.description && (
-                  <span className="block text-xs mt-0.5">{rec.description}</span>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-        <section className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-12 animate-fade-in">
-          <div className="rounded-xl bg-white/90 shadow-lg backdrop-blur-sm p-6 flex flex-col items-center justify-center">
-            <span className="text-lg font-semibold text-gray-800 mb-3">
-              Product Metrics Breakdown
-            </span>
-            <PieChart width={320} height={220}>
-              <Pie
-                data={pieChartData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                innerRadius={43}
-                label={({ name, percent }) =>
-                  `${name} (${(percent * 100).toFixed(1)}%)`
-                }
-                labelLine={false}
-              >
-                {pieChartData.map((entry, i) => (
-                  <Cell key={`cell-${i}`} fill={pieColors[i % pieColors.length]} />
-                ))}
-              </Pie>
-              <Tooltip
-                formatter={(_value: any, name: any, props: any) => {
-                  if (props && typeof props.dataIndex === 'number' && pieChartData[props.dataIndex]) {
-                    return [`${pieChartData[props.dataIndex].display}`, name];
-                  }
-                  return [`${_value}`, name];
-                }}
-                contentStyle={{ backgroundColor: "#fff", color: "#151515" }}
-              />
-              <Legend
-                verticalAlign="bottom"
-                iconType="circle"
-                formatter={(value: string) => (
-                  <span className="text-gray-700 text-sm">{value}</span>
-                )}
-              />
-            </PieChart>
-          </div>
-        </section>
+        <LineChartSection />
+        <RecommendationsSection />
+        <PieChartSection />
         <section className="mb-10">
           <div className="bg-white/10 rounded-xl p-6 flex flex-col">
             <span className="text-lg font-semibold text-white mb-3">Recent Trends</span>
