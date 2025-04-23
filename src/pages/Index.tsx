@@ -1,9 +1,8 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
-import { Button } from '@/components/ui/button';
+import FloatingBackground from '@/components/FloatingBackground';
 import { Smartphone, ShoppingBag, TrendingUp, ShoppingCart, Laptop } from 'lucide-react';
 
 const categories = [
@@ -50,12 +49,8 @@ const Index = () => {
 
   return (
     <main className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center">
-      {/* Background with product images and gradient overlay */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1f2c]/95 via-[#1EAEDB]/80 to-[#7E69AB]/90" />
-        <div className="absolute inset-0 bg-[url('/lovable-uploads/58828f58-010b-458d-84ce-7a0afb939604.png')] bg-cover bg-center opacity-30" />
-      </div>
-
+      <FloatingBackground />
+      
       <div className="relative z-20 flex flex-col items-center w-full px-4">
         <Header />
         <div className="w-full flex flex-col items-center justify-center pt-36 pb-10">
