@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import { Button } from '@/components/ui/button';
-import { Smartphone, ShoppingBag, TrendingUp, Groceries, Laptop } from 'lucide-react';
+import { Smartphone, ShoppingBag, TrendingUp, ShoppingCart, Laptop } from 'lucide-react';
 
 const categories = [
   {
@@ -24,7 +24,7 @@ const categories = [
   },
   {
     name: "Groceries",
-    icon: Groceries,
+    icon: ShoppingCart,
     className: "bg-orange-500/10 hover:bg-orange-500/20"
   },
   {
