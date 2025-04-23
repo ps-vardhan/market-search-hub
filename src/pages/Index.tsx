@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
-import { Button } from '@/components/ui/button';
 import { Smartphone, ShoppingBag, TrendingUp, ShoppingCart, Laptop } from 'lucide-react';
 
 const categories = [
@@ -36,7 +35,7 @@ const categories = [
 
 const Index = () => {
   const [loaded, setLoaded] = useState(false);
-  const [query, setQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,8 +43,12 @@ const Index = () => {
   }, []);
 
   const handleCategoryClick = (category: string) => {
-    setQuery(category);
-    navigate(`/results?query=${category.toLowerCase()}`);
+    setSelectedCategory(category);
+  };
+
+  const handleSearch = (query: string) => {
+    if (!query.trim()) return;
+    navigate(`/results?query=${encodeURIComponent(query)}&category=${selectedCategory}`);
   };
 
   return (
@@ -61,16 +64,24 @@ const Index = () => {
         <div className="w-full flex flex-col items-center justify-center pt-36 pb-10">
           <div className={`transition-all duration-1000 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <h1 className="text-4xl md:text-6xl font-bold text-white text-center mb-4 drop-shadow-lg">
-              Find Product Performance
+              {selectedCategory ? `Search ${selectedCategory}` : 'Select a Category'}
             </h1>
             <p className="text-lg md:text-xl text-white/80 text-center mb-8 max-w-2xl mx-auto">
-              Enter a product to instantly see its latest performance & insights.
+              {selectedCategory 
+                ? 'Enter a product to instantly see its latest performance & insights.'
+                : 'Choose a category to begin your search.'}
             </p>
-            <div className="w-full max-w-2xl mx-auto relative">
-              <SearchBar />
-            </div>
-            <div className={`mt-12 flex flex-col items-center transition-all duration-700 delay-400 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-              <span className="text-xl text-white/90 mb-6 font-medium">Browse Categories</span>
+
+            {selectedCategory && (
+              <div className="w-full max-w-2xl mx-auto mb-12 transition-all duration-500">
+                <SearchBar onSearch={handleSearch} />
+              </div>
+            )}
+
+            <div className={`mt-6 flex flex-col items-center transition-all duration-700 delay-400 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <span className="text-xl text-white/90 mb-6 font-medium">
+                {selectedCategory ? 'Change Category' : 'Browse Categories'}
+              </span>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-4xl mx-auto">
                 {categories.map((category) => {
                   const Icon = category.icon;
@@ -78,7 +89,9 @@ const Index = () => {
                     <button
                       key={category.name}
                       onClick={() => handleCategoryClick(category.name)}
-                      className={`${category.className} p-4 rounded-xl flex flex-col items-center justify-center gap-3 transition-all hover:scale-105 group`}
+                      className={`${category.className} p-4 rounded-xl flex flex-col items-center justify-center gap-3 transition-all hover:scale-105 group ${
+                        selectedCategory === category.name ? 'ring-2 ring-white' : ''
+                      }`}
                     >
                       <Icon className="w-8 h-8 text-white/90 group-hover:text-white" />
                       <span className="text-white font-medium">{category.name}</span>
