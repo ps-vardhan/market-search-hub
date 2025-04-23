@@ -18,6 +18,9 @@ const icons = [
 ];
 
 const FloatingBackground = () => {
+  // Define animations array at the component level so it's accessible everywhere
+  const animations = ['animate-float-1', 'animate-float-2', 'animate-float-3'];
+  
   return (
     <div className="absolute inset-0 overflow-hidden bg-[#1a1f2c]">
       {/* Gradient overlay */}
@@ -34,7 +37,6 @@ const FloatingBackground = () => {
       <div className="absolute inset-0">
         {icons.map((item, index) => {
           const { Icon, color, size } = item;
-          const animations = ['animate-float-1', 'animate-float-2', 'animate-float-3'];
           const positions = [
             'top-[10%] left-[15%]',
             'top-[20%] right-[25%]',
