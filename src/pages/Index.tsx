@@ -1,8 +1,9 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
+import { processMlQuery } from '@/services/mlService';
 import { Smartphone, ShoppingBag, TrendingUp, ShoppingCart, Laptop } from 'lucide-react';
 
 const categories = [
@@ -46,9 +47,18 @@ const Index = () => {
     setSelectedCategory(category);
   };
 
-  const handleSearch = (query: string) => {
-    if (!query.trim()) return;
-    navigate(`/results?query=${encodeURIComponent(query)}&category=${selectedCategory}`);
+  const handleSearch = async (query: string) => {
+    if (!query.trim() || !selectedCategory) return;
+    
+    try {
+      const result = await processMlQuery(selectedCategory as any, query);
+      navigate(`/results?query=${encodeURIComponent(query)}&category=${selectedCategory}`, {
+        state: { mlResults: result }
+      });
+    } catch (error) {
+      toast.error("Error processing your search. Please try again.");
+      console.error('Search error:', error);
+    }
   };
 
   return (
