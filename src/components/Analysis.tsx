@@ -1,7 +1,8 @@
-
 import { useEffect, useState } from 'react';
-import { api, CategoryAnalysis } from '../lib/api';
 import { toast } from 'sonner';
+import { api, CategoryAnalysis } from '../lib/api';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
 
 interface AnalysisProps {
   category: string;
@@ -11,6 +12,8 @@ const Analysis = ({ category }: AnalysisProps) => {
   const [analysis, setAnalysis] = useState<CategoryAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [productName, setProductName] = useState('');
+  const [productAnalysis, setProductAnalysis] = useState<any>(null);
 
   useEffect(() => {
     if (category) {
@@ -31,6 +34,24 @@ const Analysis = ({ category }: AnalysisProps) => {
     }
   }, [category]);
 
+  const handleProductSearch = async () => {
+    if (!productName.trim()) {
+      toast.error('Please enter a product name');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await api.analyzeProduct(category, productName);
+      setProductAnalysis(result);
+      toast.success(`Analysis complete for ${productName}`);
+    } catch (err) {
+      toast.error('Failed to analyze product');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
@@ -41,12 +62,60 @@ const Analysis = ({ category }: AnalysisProps) => {
   if (!analysis) return null;
 
   return (
-    <div className="p-4">
+    <div className="p-4 space-y-6">
       <h2 className="text-2xl font-bold mb-4">{category} Analysis</h2>
       
-      {/* Model Metrics */}
+      {/* Product Search Section */}
+      <div className="mb-6 p-4 bg-white rounded-lg shadow">
+        <h3 className="text-xl font-semibold mb-4">Product Analysis</h3>
+        <div className="flex gap-4">
+          <Input
+            placeholder="Enter product name..."
+            value={productName}
+            onChange={(e) => setProductName(e.target.value)}
+            className="flex-1"
+          />
+          <Button onClick={handleProductSearch}>Analyze Product</Button>
+        </div>
+      </div>
+
+      {/* Product Analysis Results */}
+      {productAnalysis && (
+        <div className="mb-6 p-4 bg-white rounded-lg shadow">
+          <h3 className="text-xl font-semibold mb-4">Product Analysis Results</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="p-4 bg-orange-50 rounded-lg">
+              <h4 className="font-semibold text-orange-700">Market Share</h4>
+              <p className="text-2xl font-bold">{productAnalysis.marketShare}%</p>
+            </div>
+            <div className="p-4 bg-green-50 rounded-lg">
+              <h4 className="font-semibold text-green-700">Growth Prediction</h4>
+              <p className="text-2xl font-bold">{productAnalysis.growthPrediction}%</p>
+            </div>
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <h4 className="font-semibold text-blue-700">Competitor Analysis</h4>
+              <p className="text-2xl font-bold">{productAnalysis.competitorPercentage}%</p>
+            </div>
+          </div>
+          
+          {/* Trend Analysis */}
+          <div className="mt-4">
+            <h4 className="font-semibold mb-2">Trend Analysis</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.entries(productAnalysis.trends).map(([key, value]) => (
+                <div key={key} className="p-3 bg-gray-50 rounded">
+                  <p className="font-medium">{key}</p>
+                  <p className="text-lg">{value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Category Analysis */}
       <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Model Performance</h3>
+        <h3 className="text-xl font-semibold mb-2">Category Overview</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 bg-white rounded shadow">
             <p>Best Model: {analysis.metrics.best_model}</p>
@@ -60,7 +129,7 @@ const Analysis = ({ category }: AnalysisProps) => {
       {/* Visualization */}
       {analysis.visualization && (
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Visualization</h3>
+          <h3 className="text-xl font-semibold mb-2">Market Trends</h3>
           <img 
             src={`data:image/png;base64,${analysis.visualization}`} 
             alt="Analysis Visualization"
@@ -72,7 +141,7 @@ const Analysis = ({ category }: AnalysisProps) => {
       {/* Insights */}
       {Object.keys(analysis.insights).length > 0 && (
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Insights</h3>
+          <h3 className="text-xl font-semibold mb-2">Market Insights</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(analysis.insights).map(([key, value]) => (
               <div key={key} className="p-4 bg-white rounded shadow">

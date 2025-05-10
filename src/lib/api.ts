@@ -35,6 +35,19 @@ export interface CategoryAnalysis {
   };
 }
 
+export interface ProductAnalysis {
+  marketShare: number;
+  growthPrediction: number;
+  competitorPercentage: number;
+  trends: {
+    [key: string]: string | number;
+  };
+  insights: {
+    [key: string]: string;
+  };
+  visualization?: string;
+}
+
 export const api = {
   async getCategories() {
     const response = await fetch(`${API_BASE_URL}/categories`);
@@ -43,6 +56,17 @@ export const api = {
 
   async analyzeCategory(category: string): Promise<CategoryAnalysis> {
     const response = await fetch(`${API_BASE_URL}/analyze/${category}`);
+    return response.json();
+  },
+
+  async analyzeProduct(category: string, productName: string): Promise<ProductAnalysis> {
+    const response = await fetch(`${API_BASE_URL}/analyze/${category}/product`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ productName }),
+    });
     return response.json();
   }
 };
