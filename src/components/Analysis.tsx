@@ -1,5 +1,7 @@
+
 import { useEffect, useState } from 'react';
 import { api, CategoryAnalysis } from '../lib/api';
+import { toast } from 'sonner';
 
 interface AnalysisProps {
   category: string;
@@ -19,16 +21,23 @@ const Analysis = ({ category }: AnalysisProps) => {
         .then(data => {
           setAnalysis(data);
           setLoading(false);
+          toast.success(`Analysis loaded for ${category}`);
         })
         .catch(err => {
           setError('Error loading analysis');
           setLoading(false);
+          toast.error(`Failed to load analysis for ${category}`);
         });
     }
   }, [category]);
 
-  if (loading) return <div>Loading analysis...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+    </div>
+  );
+  
+  if (error) return <div className="text-red-500 p-4 bg-red-50 rounded-lg">{error}</div>;
   if (!analysis) return null;
 
   return (
@@ -38,7 +47,7 @@ const Analysis = ({ category }: AnalysisProps) => {
       {/* Model Metrics */}
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">Model Performance</h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 bg-white rounded shadow">
             <p>Best Model: {analysis.metrics.best_model}</p>
             <p>MAE: {analysis.metrics.MAE.toFixed(2)}</p>
@@ -55,7 +64,7 @@ const Analysis = ({ category }: AnalysisProps) => {
           <img 
             src={`data:image/png;base64,${analysis.visualization}`} 
             alt="Analysis Visualization"
-            className="w-full"
+            className="w-full rounded-lg shadow-lg"
           />
         </div>
       )}
@@ -64,7 +73,7 @@ const Analysis = ({ category }: AnalysisProps) => {
       {Object.keys(analysis.insights).length > 0 && (
         <div className="mb-6">
           <h3 className="text-xl font-semibold mb-2">Insights</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(analysis.insights).map(([key, value]) => (
               <div key={key} className="p-4 bg-white rounded shadow">
                 <h4 className="font-semibold">{key}</h4>
