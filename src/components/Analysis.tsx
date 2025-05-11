@@ -63,12 +63,12 @@ const Analysis = ({ category }: AnalysisProps) => {
   if (!analysis) return null;
 
   return (
-    <div className="p-4 space-y-6">
-      <h2 className="text-2xl font-bold mb-4">{category} Analysis</h2>
+    <div className="p-4 space-y-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl">
+      <h2 className="text-2xl font-bold mb-4 text-indigo-700">{category} Analysis</h2>
       
       {/* Product Search Section */}
-      <div className="mb-6 p-4 bg-white rounded-lg shadow">
-        <h3 className="text-xl font-semibold mb-4">Product Analysis</h3>
+      <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+        <h3 className="text-xl font-semibold mb-4 text-indigo-600">Product Analysis</h3>
         <div className="flex gap-4">
           <Input
             placeholder="Enter product name..."
@@ -76,24 +76,24 @@ const Analysis = ({ category }: AnalysisProps) => {
             onChange={(e) => setProductName(e.target.value)}
             className="flex-1"
           />
-          <Button onClick={handleProductSearch}>Analyze Product</Button>
+          <Button onClick={handleProductSearch} className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600">Analyze Product</Button>
         </div>
       </div>
 
       {/* Product Analysis Results */}
       {productAnalysis && (
-        <div className="mb-6 p-4 bg-white rounded-lg shadow">
-          <h3 className="text-xl font-semibold mb-4">Product Analysis Results</h3>
+        <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+          <h3 className="text-xl font-semibold mb-4 text-indigo-600">Product Analysis Results</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="p-4 bg-orange-50 rounded-lg">
+            <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
               <h4 className="font-semibold text-orange-700">Market Share</h4>
               <p className="text-2xl font-bold">{productAnalysis.marketShare}%</p>
             </div>
-            <div className="p-4 bg-green-50 rounded-lg">
+            <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
               <h4 className="font-semibold text-green-700">Growth Prediction</h4>
               <p className="text-2xl font-bold">{productAnalysis.growthPrediction}%</p>
             </div>
-            <div className="p-4 bg-blue-50 rounded-lg">
+            <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
               <h4 className="font-semibold text-blue-700">Competitor Analysis</h4>
               <p className="text-2xl font-bold">{productAnalysis.competitorPercentage}%</p>
             </div>
@@ -101,11 +101,11 @@ const Analysis = ({ category }: AnalysisProps) => {
           
           {/* Trend Analysis */}
           <div className="mt-4">
-            <h4 className="font-semibold mb-2">Trend Analysis</h4>
+            <h4 className="font-semibold mb-2 text-indigo-600">Trend Analysis</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries(productAnalysis.trends).map(([key, value]) => (
-                <div key={key} className="p-3 bg-gray-50 rounded">
-                  <p className="font-medium">{key}</p>
+                <div key={key} className="p-3 bg-gradient-to-r from-gray-50 to-indigo-50 rounded border border-indigo-100">
+                  <p className="font-medium text-indigo-700">{key}</p>
                   <p className="text-lg">{String(value)}</p>
                 </div>
               ))}
@@ -116,13 +116,13 @@ const Analysis = ({ category }: AnalysisProps) => {
 
       {/* Category Analysis */}
       <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Category Overview</h3>
+        <h3 className="text-xl font-semibold mb-2 text-indigo-600">Category Overview</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-white rounded shadow">
-            <p>Best Model: {analysis.metrics.best_model}</p>
-            <p>MAE: {analysis.metrics.MAE.toFixed(2)}</p>
-            <p>RMSE: {analysis.metrics.RMSE.toFixed(2)}</p>
-            <p>R²: {analysis.metrics.R2.toFixed(2)}</p>
+          <div className="p-4 bg-gradient-to-br from-white to-purple-50 rounded-lg shadow-md border border-purple-100">
+            <p className="font-medium text-indigo-600">Best Model: <span className="text-gray-800">{analysis.metrics.best_model}</span></p>
+            <p className="font-medium text-indigo-600">MAE: <span className="text-gray-800">{analysis.metrics.MAE.toFixed(2)}</span></p>
+            <p className="font-medium text-indigo-600">RMSE: <span className="text-gray-800">{analysis.metrics.RMSE.toFixed(2)}</span></p>
+            <p className="font-medium text-indigo-600">R²: <span className="text-gray-800">{analysis.metrics.R2.toFixed(2)}</span></p>
           </div>
         </div>
       </div>
@@ -130,23 +130,25 @@ const Analysis = ({ category }: AnalysisProps) => {
       {/* Visualization */}
       {analysis.visualization && (
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Market Trends</h3>
-          <img 
-            src={`data:image/png;base64,${analysis.visualization}`} 
-            alt="Analysis Visualization"
-            className="w-full rounded-lg shadow-lg"
-          />
+          <h3 className="text-xl font-semibold mb-2 text-indigo-600">Market Trends</h3>
+          <div className="p-2 bg-white rounded-lg shadow-lg border border-indigo-100">
+            <img 
+              src={`data:image/png;base64,${analysis.visualization}`} 
+              alt="Analysis Visualization"
+              className="w-full rounded-lg"
+            />
+          </div>
         </div>
       )}
 
       {/* Insights */}
       {Object.keys(analysis.insights).length > 0 && (
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Market Insights</h3>
+          <h3 className="text-xl font-semibold mb-2 text-indigo-600">Market Insights</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(analysis.insights).map(([key, value]) => (
-              <div key={key} className="p-4 bg-white rounded shadow">
-                <h4 className="font-semibold">{key}</h4>
+              <div key={key} className="p-4 bg-gradient-to-br from-white to-blue-50 rounded-lg shadow-md border border-blue-100">
+                <h4 className="font-semibold text-blue-700">{key}</h4>
                 <p>{String(value)}</p>
               </div>
             ))}

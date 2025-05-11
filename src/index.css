@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -137,4 +138,31 @@
 
 .animate-fade-in {
   animation: fadeIn 0.8s ease-out forwards;
+}
+
+/* Vibrant backgrounds */
+.bg-gradient-vibrant-blue {
+  background: linear-gradient(135deg, #0EA5E9 0%, #6366F1 50%, #8B5CF6 100%);
+}
+
+.bg-gradient-vibrant-purple {
+  background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 50%, #EF4444 100%);
+}
+
+.bg-gradient-vibrant-orange {
+  background: linear-gradient(135deg, #F59E0B 0%, #F97316 50%, #EF4444 100%);
+}
+
+.bg-gradient-vibrant-green {
+  background: linear-gradient(135deg, #10B981 0%, #34D399 50%, #A3E635 100%);
+}
+
+.bg-gradient-vibrant-pink {
+  background: linear-gradient(135deg, #EC4899 0%, #F472B6 50%, #F87171 100%);
+}
+
+.glass-effect {
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
