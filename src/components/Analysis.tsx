@@ -1,6 +1,7 @@
+
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { api, CategoryAnalysis } from '../lib/api';
+import { api, CategoryAnalysis, ProductAnalysis } from '../lib/api';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 
@@ -13,7 +14,7 @@ const Analysis = ({ category }: AnalysisProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [productName, setProductName] = useState('');
-  const [productAnalysis, setProductAnalysis] = useState<any>(null);
+  const [productAnalysis, setProductAnalysis] = useState<ProductAnalysis | null>(null);
 
   useEffect(() => {
     if (category) {
@@ -105,7 +106,7 @@ const Analysis = ({ category }: AnalysisProps) => {
               {Object.entries(productAnalysis.trends).map(([key, value]) => (
                 <div key={key} className="p-3 bg-gray-50 rounded">
                   <p className="font-medium">{key}</p>
-                  <p className="text-lg">{value}</p>
+                  <p className="text-lg">{String(value)}</p>
                 </div>
               ))}
             </div>
@@ -146,7 +147,7 @@ const Analysis = ({ category }: AnalysisProps) => {
             {Object.entries(analysis.insights).map(([key, value]) => (
               <div key={key} className="p-4 bg-white rounded shadow">
                 <h4 className="font-semibold">{key}</h4>
-                <p>{value}</p>
+                <p>{String(value)}</p>
               </div>
             ))}
           </div>
