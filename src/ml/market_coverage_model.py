@@ -233,6 +233,12 @@ class MarketCoveragePredictor:
             if not feature_columns:
                 raise ValueError("No suitable features found for training")
             
+            # Filter feature columns to only include those that exist in the dataframe
+            feature_columns = [col for col in feature_columns if col in df_processed.columns]
+            
+            if not feature_columns:
+                raise ValueError("No valid features found in dataframe")
+            
             X = df_processed[feature_columns].fillna(0)
             y = df_processed['market_coverage']
             
