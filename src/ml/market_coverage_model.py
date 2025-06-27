@@ -308,8 +308,13 @@ class MarketCoveragePredictor:
             if df_processed.empty:
                 return {"error": "No data found for specified product/brand"}
             
-            # Use the same features as training
-            X = df_processed[self.feature_columns].fillna(0)
+            # Use the same features as training, filtered for existing columns
+            available_features = [col for col in self.feature_columns if col in df_processed.columns]
+            
+            if not available_features:
+                return {"error": "No suitable features available for prediction"}
+                
+            X = df_processed[available_features].fillna(0)
             
             # Make predictions
             predictions = self.best_model.predict(X)
