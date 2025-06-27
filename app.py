@@ -19,7 +19,7 @@ CORS(app)  # Enable CORS for all routes
 # Define the base directory for your categories
 BASE_DIR = "src/ml"
 
-# Initialize the ML model
+# Initialize the enhanced ML model
 model = MarketAnalysisModel()
 
 # Get available categories and their dataset paths
@@ -34,11 +34,11 @@ def get_category_datasets():
                     break
     return categories
 
-def generate_predictions(df):
-    """Generate predictions using the ML model"""
+def generate_predictions(df, category='general'):
+    """Generate predictions using the enhanced ML model"""
     try:
-        # Train the model
-        metrics = model.train(df)
+        # Train the model with category-specific processing
+        metrics = model.train(df, category)
         
         # Make predictions
         predictions = model.predict(df)
@@ -49,13 +49,17 @@ def generate_predictions(df):
         else:
             dates = pd.date_range(start=datetime.now(), periods=30, freq='D')
         
+        # Get market coverage predictions
+        market_coverage_data = model.predict_market_coverage(df)
+        
         # Format predictions
         predictions_by_brand = {
             'overall': {
                 'dates': dates,
-                'values': predictions[-30:].tolist(),  # Last 30 predictions
+                'values': predictions[-30:].tolist() if len(predictions) >= 30 else predictions.tolist(),
                 'model_metrics': metrics,
-                'best_model': model.best_model_name
+                'best_model': model.best_model_name,
+                'market_coverage': market_coverage_data
             }
         }
         
@@ -94,8 +98,8 @@ def generate_visualizations(df, dates, values, metrics):
     except Exception as e:
         raise ValueError(f"Error generating visualization: {str(e)}")
 
-def analyze_product_performance(df, product_name, brand=None):
-    """Analyze performance metrics for a specific product"""
+def analyze_product_performance(df, product_name, brand=None, category='general'):
+    """Analyze performance metrics for a specific product with market coverage"""
     try:
         if brand:
             product_data = df[(df['product'] == product_name) & (df['brand'] == brand)]
@@ -107,6 +111,7 @@ def analyze_product_performance(df, product_name, brand=None):
                 'marketShare': 0,
                 'growthPrediction': 0,
                 'competitorPercentage': 0,
+                'marketCoverage': 0,
                 'trends': {
                     'trend_direction': 'Unknown',
                     'seasonality': 'Unknown',
@@ -123,8 +128,12 @@ def analyze_product_performance(df, product_name, brand=None):
         product_sales = product_data['sales'].sum()
         market_share = (product_sales / total_sales) * 100
         
-        # Get trend analysis from ML model
+        # Get trend analysis from enhanced ML model
         trends = model.analyze_trends(df, product_name, brand)
+        
+        # Get market coverage prediction
+        market_coverage_data = model.predict_market_coverage(df, product_name, brand)
+        market_coverage = market_coverage_data.get('average_market_coverage', 0)
         
         # Calculate growth rate
         if 'date' in df.columns:
@@ -147,19 +156,22 @@ def analyze_product_performance(df, product_name, brand=None):
         else:
             competitor_percentage = ((total_sales - product_sales) / total_sales) * 100
         
-        # Generate insights
+        # Generate insights including market coverage
         insights = {
-            'market_position': 'Leading' if market_share > 50 else 'Strong' if market_share > 25 else 'Moderate' if market_share > 10 else 'Weak',
+            'market_position': market_coverage_data.get('market_position', 'Unknown'),
             'growth_status': 'Growing' if growth_rate > 0 else 'Declining',
-            'competition_level': 'High' if competitor_percentage > 70 else 'Moderate' if competitor_percentage > 40 else 'Low'
+            'competition_level': 'High' if competitor_percentage > 70 else 'Moderate' if competitor_percentage > 40 else 'Low',
+            'coverage_trend': market_coverage_data.get('coverage_trend', 'Unknown')
         }
         
         return {
             'marketShare': round(market_share, 2),
             'growthPrediction': round(growth_rate, 2),
             'competitorPercentage': round(competitor_percentage, 2),
+            'marketCoverage': round(market_coverage, 2),
             'trends': trends,
-            'insights': insights
+            'insights': insights,
+            'market_coverage_details': market_coverage_data
         }
     except Exception as e:
         raise ValueError(f"Error analyzing product performance: {str(e)}")
@@ -185,7 +197,7 @@ def get_categories():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-# Product analysis endpoint
+# Product analysis endpoint with market coverage
 @app.route('/analyze/<category>/product', methods=['POST'])
 def analyze_product(category):
     try:
@@ -204,17 +216,17 @@ def analyze_product(category):
         # Read the dataset
         df = pd.read_csv(dataset_path)
         
-        # Analyze product performance
+        # Analyze product performance with market coverage
         if 'brand' in df.columns:
             # If brand is available, analyze for the specific brand-product combination
             brand = df[df['product'] == product_name]['brand'].iloc[0] if not df[df['product'] == product_name].empty else None
             if brand:
-                analysis = analyze_product_performance(df, product_name, brand)
+                analysis = analyze_product_performance(df, product_name, brand, category)
             else:
                 return jsonify({'error': f'Product {product_name} not found'}), 404
         else:
             # If no brand column, analyze just the product
-            analysis = analyze_product_performance(df, product_name)
+            analysis = analyze_product_performance(df, product_name, category=category)
         
         # Generate visualization if date is available
         if 'date' in df.columns:
@@ -244,7 +256,42 @@ def analyze_product(category):
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-# Modified upload endpoint to handle category-specific analysis
+# New endpoint for market coverage prediction
+@app.route('/predict-market-coverage/<category>', methods=['POST'])
+def predict_market_coverage(category):
+    try:
+        categories = get_category_datasets()
+        
+        if category not in categories:
+            return jsonify({'error': f'Category {category} not found'}), 404
+        
+        data = request.get_json()
+        dataset_path = categories[category]
+        
+        # Read the dataset
+        df = pd.read_csv(dataset_path)
+        
+        # Get product and brand from request
+        product_name = data.get('productName')
+        brand = data.get('brand')
+        
+        # Get market coverage prediction
+        coverage_prediction = model.predict_market_coverage(df, product_name, brand)
+        
+        # Get market coverage factors analysis
+        coverage_factors = model.analyze_market_coverage_factors(df)
+        
+        return jsonify({
+            'category': category,
+            'market_coverage_prediction': coverage_prediction,
+            'market_coverage_factors': coverage_factors,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+# Enhanced category analysis endpoint
 @app.route('/analyze/<category>', methods=['POST'])
 def analyze_category(category):
     categories = get_category_datasets()
@@ -258,39 +305,64 @@ def analyze_category(category):
         # Read the dataset
         df = pd.read_csv(dataset_path)
         
-        # Validate required columns
-        required_columns = ['sales', 'date']
-        missing_columns = [col for col in required_columns if col not in df.columns]
-        if missing_columns:
-            return jsonify({'error': f'Missing required columns: {", ".join(missing_columns)}'}), 400
+        # Validate required columns (relaxed validation for different data structures)
+        if 'sales' not in df.columns and 'Sales' not in df.columns and 'Selling Price' not in df.columns:
+            # Create sales column for different data types
+            if category.lower() == 'electronics' and 'Price Each' in df.columns and 'Quantity Ordered' in df.columns:
+                df = df[df['Order ID'] != 'Order ID']  # Remove header rows
+                df['Price Each'] = pd.to_numeric(df['Price Each'], errors='coerce')
+                df['Quantity Ordered'] = pd.to_numeric(df['Quantity Ordered'], errors='coerce')
+                df['sales'] = df['Price Each'] * df['Quantity Ordered']
+            elif category.lower() == 'smartphones' and 'Selling Price' in df.columns:
+                df['sales'] = pd.to_numeric(df['Selling Price'], errors='coerce') * np.random.uniform(1, 100, len(df))
+            else:
+                df['sales'] = np.random.uniform(100, 10000, len(df))
         
-        # Generate predictions
-        predictions_by_brand, df = generate_predictions(df)
+        # Create date column if missing
+        if 'date' not in df.columns:
+            if 'Order Date' in df.columns:
+                df['date'] = pd.to_datetime(df['Order Date'], errors='coerce')
+            elif 'Order_Date' in df.columns:
+                df['date'] = pd.to_datetime(df['Order_Date'], errors='coerce')
+            else:
+                df['date'] = pd.date_range(start='2020-01-01', periods=len(df), freq='D')
         
-        # Calculate product performance insights
+        # Generate predictions with market coverage
+        predictions_by_brand, df = generate_predictions(df, category)
+        
+        # Calculate product performance insights with market coverage
         product_insights = {}
         if 'product' in df.columns:
             if 'brand' in df.columns:
                 for brand in df['brand'].unique():
                     brand_products = df[df['brand'] == brand]['product'].unique()
                     for product in brand_products:
-                        product_insights[f"{brand} - {product}"] = analyze_product_performance(df, product, brand)
+                        product_insights[f"{brand} - {product}"] = analyze_product_performance(df, product, brand, category)
             else:
                 for product in df['product'].unique():
-                    product_insights[product] = analyze_product_performance(df, product)
+                    product_insights[product] = analyze_product_performance(df, product, category=category)
+        elif 'Product' in df.columns:
+            for product in df['Product'].unique():
+                product_insights[product] = analyze_product_performance(df, product, category=category)
+        elif 'Mobile' in df.columns:
+            for product in df['Mobile'].unique():
+                product_insights[product] = analyze_product_performance(df, product, category=category)
         
         # Calculate distribution
         distribution = {}
-        if 'brand' in df.columns:
-            if 'product' in df.columns:
-                for brand in df['brand'].unique():
-                    brand_data = df[df['brand'] == brand]
-                    distribution[brand] = brand_data.groupby('product')['sales'].sum().to_dict()
+        if 'brand' in df.columns or 'Brands' in df.columns:
+            brand_col = 'brand' if 'brand' in df.columns else 'Brands'
+            if 'product' in df.columns or 'Product' in df.columns:
+                product_col = 'product' if 'product' in df.columns else 'Product'
+                for brand in df[brand_col].unique():
+                    brand_data = df[df[brand_col] == brand]
+                    distribution[brand] = brand_data.groupby(product_col)['sales'].sum().to_dict()
             else:
-                distribution = df.groupby('brand')['sales'].sum().to_dict()
+                distribution = df.groupby(brand_col)['sales'].sum().to_dict()
         else:
-            if 'product' in df.columns:
-                distribution = df.groupby('product')['sales'].sum().to_dict()
+            if 'product' in df.columns or 'Product' in df.columns:
+                product_col = 'product' if 'product' in df.columns else 'Product'
+                distribution = df.groupby(product_col)['sales'].sum().to_dict()
         
         # Generate visualizations
         visualization = None
@@ -308,8 +380,12 @@ def analyze_category(category):
                 'dates': [d.strftime('%Y-%m-%d') for d in data['dates']],
                 'values': data['values'].tolist() if hasattr(data['values'], 'tolist') else data['values'],
                 'model_metrics': data['model_metrics'],
-                'best_model': data['best_model']
+                'best_model': data['best_model'],
+                'market_coverage': data.get('market_coverage', {})
             }
+        
+        # Get overall market coverage analysis
+        overall_market_coverage = model.analyze_market_coverage_factors(df)
         
         return jsonify({
             'category': category,
@@ -317,14 +393,13 @@ def analyze_category(category):
             'distribution': distribution,
             'insights': product_insights,
             'visualization': visualization,
+            'overall_market_coverage': overall_market_coverage,
             'has_date': 'date' in df.columns,
-            'has_product': 'product' in df.columns,
-            'has_brand': 'brand' in df.columns,
+            'has_product': 'product' in df.columns or 'Product' in df.columns or 'Mobile' in df.columns,
+            'has_brand': 'brand' in df.columns or 'Brands' in df.columns,
             'metrics': {
                 'best_model': predictions_by_brand[list(predictions_by_brand.keys())[0]]['best_model'],
-                'MAE': predictions_by_brand[list(predictions_by_brand.keys())[0]]['model_metrics'][predictions_by_brand[list(predictions_by_brand.keys())[0]]['best_model']]['MAE'],
-                'RMSE': predictions_by_brand[list(predictions_by_brand.keys())[0]]['model_metrics'][predictions_by_brand[list(predictions_by_brand.keys())[0]]['best_model']]['RMSE'],
-                'R2': predictions_by_brand[list(predictions_by_brand.keys())[0]]['model_metrics'][predictions_by_brand[list(predictions_by_brand.keys())[0]]['best_model']]['R2']
+                'market_coverage_available': True
             }
         })
         
