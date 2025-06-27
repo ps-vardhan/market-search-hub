@@ -34,11 +34,11 @@ def get_category_datasets():
                     break
     return categories
 
-def generate_predictions(df):
-    """Generate predictions using the ML model"""
+def generate_predictions(df, category='general'):
+    """Generate predictions using the enhanced ML model"""
     try:
-        # Train the model
-        metrics = model.train(df)
+        # Train the model with category-specific processing
+        metrics = model.train(df, category)
         
         # Make predictions
         predictions = model.predict(df)
@@ -49,13 +49,17 @@ def generate_predictions(df):
         else:
             dates = pd.date_range(start=datetime.now(), periods=30, freq='D')
         
+        # Get market coverage predictions
+        market_coverage_data = model.predict_market_coverage(df)
+        
         # Format predictions
         predictions_by_brand = {
             'overall': {
                 'dates': dates,
-                'values': predictions[-30:].tolist(),  # Last 30 predictions
+                'values': predictions[-30:].tolist() if len(predictions) >= 30 else predictions.tolist(),
                 'model_metrics': metrics,
-                'best_model': model.best_model_name
+                'best_model': model.best_model_name,
+                'market_coverage': market_coverage_data
             }
         }
         
