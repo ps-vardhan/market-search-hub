@@ -8,9 +8,10 @@ from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error, a
 import xgboost as xgb
 from statsmodels.tsa.seasonal import seasonal_decompose
 import warnings
+from .enhanced_model import EnhancedMarketAnalysisModel
 warnings.filterwarnings('ignore')
 
-class MarketAnalysisModel:
+class MarketAnalysisModel(EnhancedMarketAnalysisModel):
     def __init__(self):
         self.models = {
             'random_forest': RandomForestRegressor(n_estimators=100, random_state=42),
