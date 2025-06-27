@@ -98,8 +98,8 @@ def generate_visualizations(df, dates, values, metrics):
     except Exception as e:
         raise ValueError(f"Error generating visualization: {str(e)}")
 
-def analyze_product_performance(df, product_name, brand=None):
-    """Analyze performance metrics for a specific product"""
+def analyze_product_performance(df, product_name, brand=None, category='general'):
+    """Analyze performance metrics for a specific product with market coverage"""
     try:
         if brand:
             product_data = df[(df['product'] == product_name) & (df['brand'] == brand)]
@@ -111,6 +111,7 @@ def analyze_product_performance(df, product_name, brand=None):
                 'marketShare': 0,
                 'growthPrediction': 0,
                 'competitorPercentage': 0,
+                'marketCoverage': 0,
                 'trends': {
                     'trend_direction': 'Unknown',
                     'seasonality': 'Unknown',
@@ -127,8 +128,12 @@ def analyze_product_performance(df, product_name, brand=None):
         product_sales = product_data['sales'].sum()
         market_share = (product_sales / total_sales) * 100
         
-        # Get trend analysis from ML model
+        # Get trend analysis from enhanced ML model
         trends = model.analyze_trends(df, product_name, brand)
+        
+        # Get market coverage prediction
+        market_coverage_data = model.predict_market_coverage(df, product_name, brand)
+        market_coverage = market_coverage_data.get('average_market_coverage', 0)
         
         # Calculate growth rate
         if 'date' in df.columns:
@@ -151,19 +156,22 @@ def analyze_product_performance(df, product_name, brand=None):
         else:
             competitor_percentage = ((total_sales - product_sales) / total_sales) * 100
         
-        # Generate insights
+        # Generate insights including market coverage
         insights = {
-            'market_position': 'Leading' if market_share > 50 else 'Strong' if market_share > 25 else 'Moderate' if market_share > 10 else 'Weak',
+            'market_position': market_coverage_data.get('market_position', 'Unknown'),
             'growth_status': 'Growing' if growth_rate > 0 else 'Declining',
-            'competition_level': 'High' if competitor_percentage > 70 else 'Moderate' if competitor_percentage > 40 else 'Low'
+            'competition_level': 'High' if competitor_percentage > 70 else 'Moderate' if competitor_percentage > 40 else 'Low',
+            'coverage_trend': market_coverage_data.get('coverage_trend', 'Unknown')
         }
         
         return {
             'marketShare': round(market_share, 2),
             'growthPrediction': round(growth_rate, 2),
             'competitorPercentage': round(competitor_percentage, 2),
+            'marketCoverage': round(market_coverage, 2),
             'trends': trends,
-            'insights': insights
+            'insights': insights,
+            'market_coverage_details': market_coverage_data
         }
     except Exception as e:
         raise ValueError(f"Error analyzing product performance: {str(e)}")
