@@ -19,7 +19,7 @@ CORS(app)  # Enable CORS for all routes
 # Define the base directory for your categories
 BASE_DIR = "src/ml"
 
-# Initialize the ML model
+# Initialize the enhanced ML model
 model = MarketAnalysisModel()
 
 # Get available categories and their dataset paths
