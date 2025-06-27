@@ -180,7 +180,11 @@ class MarketCoveragePredictor:
             if col in df.columns:
                 if col not in self.label_encoders:
                     self.label_encoders[col] = LabelEncoder()
+                try:
                     df[f'{col}_encoded'] = self.label_encoders[col].fit_transform(df[col].astype(str))
+                except Exception as e:
+                    print(f"Warning: Could not encode {col}: {str(e)}")
+                    continue
         
         # Market coverage calculation
         total_market_value = df['sales'].sum()
